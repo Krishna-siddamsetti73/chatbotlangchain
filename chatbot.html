@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        .chat-message {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background: #007bff;
+            color: white;
+            text-align: right;
+        }
+        .bot-message {
+            background: #e0e0e0;
+            color: black;
+            text-align: left;
+        }
+        .chat-input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .chat-button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .chat-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>AI Chatbot</h1>
+        <div class="chat-box" id="chat-box"></div>
+        <div style="display: flex;">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." style="flex: 1;">
+            <button class="chat-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            let userMessage = document.getElementById("chat-input").value;
+            let chatBox = document.getElementById("chat-box");
+
+            if (userMessage.trim() === "") {
+                return;
+            }
+            // Display user message
+            let userMessageElement = document.createElement("div");
+            userMessageElement.style.marginLeft = "100px"; // Make room on the left
+            userMessageElement.classList.add("chat-message", "user-message");
+            userMessageElement.innerText = userMessage;
+            chatBox.appendChild(userMessageElement);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
+
+            // Send user message to the Flask backend
+            let response = await fetch("http://127.0.0.1:5000/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ query: userMessage })
+            });
+
+            let result = await response.json();
+
+            // Display chatbot response
+            let botMessageElement = document.createElement("div");
+            botMessageElement.classList.add("chat-message", "bot-message");
+            botMessageElement.innerText = result.response;
+            botMessageElement.style.marginRight = "100px"; // Make room on the right
+            chatBox.appendChild(botMessageElement);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
+
+            // Clear input field after sending message
+            document.getElementById("chat-input").value = "";
+        }
+    </script>
+</body>
+</html>
